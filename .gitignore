@@ -1,0 +1,17 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea/.idea.CockyShop/.idea/dataSources.local.xml
+.idea/.idea.CockyShop/.idea/dataSources.xml
+.idea/.idea.CockyShop/.idea/dataSources/129afb7e-1056-42f8-80b3-3b98fa0502e3.xml
+.idea/.idea.CockyShop/.idea/dataSources/129afb7e-1056-42f8-80b3-3b98fa0502e3/storage_v2/_src_/schema/information_schema.FNRwLQ.meta
+.idea/.idea.CockyShop/.idea/dataSources/129afb7e-1056-42f8-80b3-3b98fa0502e3/storage_v2/_src_/schema/mysql.osA4Bg.meta
+.idea/.idea.CockyShop/.idea/dataSources/129afb7e-1056-42f8-80b3-3b98fa0502e3/storage_v2/_src_/schema/performance_schema.kIw0nw.meta
+.idea/.idea.CockyShop/.idea/dataSources/129afb7e-1056-42f8-80b3-3b98fa0502e3/storage_v2/_src_/schema/sys.zb4BAA.meta
+.idea/.idea.CockyShop/.idea/encodings.xml
+.idea/.idea.CockyShop/.idea/indexLayout.xml
+.idea/.idea.CockyShop/.idea/projectSettingsUpdater.xml
+.idea/.idea.CockyShop/.idea/vcs.xml
+.idea/.idea.CockyShop/.idea/workspace.xml
