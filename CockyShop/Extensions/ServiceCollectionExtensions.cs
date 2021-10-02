@@ -1,6 +1,9 @@
 ﻿using System;
 using CockyShop.Infrastucture;
+using CockyShop.Middlewares;
 using CockyShop.Models.Identity;
+using CockyShop.Services;
+using CockyShop.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -47,7 +50,10 @@ namespace CockyShop.Extensions
                         
             services.AddDbContext<AppDbContext>(o => 
                 o.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
+            
+            services.AddScoped<IProductsService, ProductsService>();
+            services.AddTransient<ExceptionHandlerMiddleware>();
+            
             return services;
         }
     }
