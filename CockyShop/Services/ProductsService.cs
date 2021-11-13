@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using CockyShop.Exceptions;
 using CockyShop.Infrastucture;
+using CockyShop.Models.App;
 using CockyShop.Models.DTO;
+using CockyShop.Models.Requests;
 using CockyShop.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +31,9 @@ namespace CockyShop.Services
                     Id = p.ProductId,
                     Name = p.Product.Name,
                     Price = p.Price,
+                    CityId = p.Stock.City.Id,
+                    CityName = p.Stock.City.Name,
+                    QtyOnStock = (int)p.QtyOnStock,
                     Available = p.QtyOnStock > 0
                 }).ToListAsync();
 
@@ -46,6 +51,9 @@ namespace CockyShop.Services
                     Id = p.ProductId,
                     Name = p.Product.Name,
                     Price = p.Price,
+                    CityId = p.Stock.City.Id,
+                    CityName = p.Stock.City.Name,
+                    QtyOnStock = (int)p.QtyOnStock,
                     Available = p.QtyOnStock > 0
                 }).FirstOrDefaultAsync();
 
@@ -55,6 +63,39 @@ namespace CockyShop.Services
             }
 
             return productDto;
+        }
+
+        public async Task<ProductInStockDto> UpdateProductInCity(int cityId, int productId, ProductStockRequest request)
+        {
+            await ValidateCity(cityId);
+            
+            var productStock = await _appDbContext.ProductStocks
+                .Where(ps => ps.Stock.City.Id == cityId && ps.ProductId == productId)
+                .Include(p => p.Product)
+                .Include(p => p.Stock.City)
+                .FirstOrDefaultAsync();
+
+            if (productStock == null)
+            {
+                throw new EntityNotFoundException($"Product with {productId} not found in City with {cityId}!");
+            }
+
+            productStock.Price = request.Price;
+            productStock.QtyOnStock = request.QtyOnStock;
+            _appDbContext.ProductStocks.Update(productStock);
+            await _appDbContext.SaveChangesAsync();
+
+            return new ProductInStockDto()
+            {
+                Id = productStock.Id,
+                Price = productStock.Price,
+                Name = productStock.Product.Name,
+                CityId = productStock.Stock.City.Id,
+                CityName = productStock.Stock.City.Name,
+                QtyOnStock = (int)productStock.QtyOnStock,
+                Available = productStock.QtyOnStock > 0
+            };
+
         }
 
         public async Task DeleteProductInCityById(int cityId, int productId)
@@ -99,6 +140,37 @@ namespace CockyShop.Services
             }
 
             return productDto;
+        }
+
+        public async Task<ProductDto> CreateProduct(ProductRequest request)
+        {
+            Product product = new Product() {Name = request.Name};
+
+            var productCreated = (await _appDbContext.Products.AddAsync(product)).Entity;
+            await _appDbContext.SaveChangesAsync();
+
+            return new ProductDto()
+            {
+                Id = productCreated.Id,
+                Name = productCreated.Name
+            };
+        }
+
+        public async Task<ProductDto> UpdateProductById(int id, ProductRequest request)
+        {
+            var productDto = await _appDbContext.Products
+                .Where(p => p.Id == id).FirstOrDefaultAsync();
+
+            if (productDto == null)
+            {
+                throw new EntityNotFoundException($"Product with {id} not found!");
+            }
+
+            productDto.Name = request.Name;
+            _appDbContext.Products.Update(productDto);
+            await _appDbContext.SaveChangesAsync();
+
+            return new ProductDto() {Name = productDto.Name};
         }
 
         public async Task DeleteProductById(int id)

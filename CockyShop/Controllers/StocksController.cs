@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CockyShop.Models.DTO;
+using CockyShop.Models.Requests;
 using CockyShop.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +27,13 @@ namespace CockyShop.Controllers
             [FromRoute] int productId)
         {
             return Ok(await _productsService.GetProductInCityById(cityId, productId));
+        }
+        
+        [HttpPut("products/{productId}")]
+        public async Task<ActionResult<ProductInStockDto>> UpdateProductInCityById([FromQuery] int cityId,
+            [FromRoute] int productId, [FromBody] ProductStockRequest request)
+        {
+            return Ok(await _productsService.UpdateProductInCity(cityId, productId, request));
         }
         
         [HttpDelete("products/{productId}")]

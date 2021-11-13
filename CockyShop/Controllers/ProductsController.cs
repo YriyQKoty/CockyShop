@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using CockyShop.Models.DTO;
+using CockyShop.Models.Requests;
 using CockyShop.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,19 @@ namespace CockyShop.Controllers
         public async Task<ActionResult<List<ProductDto>>> GetProductById([FromRoute]int id)
         {
             return Ok(await _productsService.GetProductById(id));
+        }
+        
+        [HttpPost]
+        public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] ProductRequest request)
+        {
+            return Ok(await _productsService.CreateProduct(request));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ProductDto>> UpdateProductById([FromRoute] int id,
+            [FromBody] ProductRequest request)
+        {
+            return Ok(await _productsService.UpdateProductById(id, request));
         }
         
         [HttpDelete("{id}")]
