@@ -65,19 +65,19 @@ namespace CockyShop.Services
             return productDto;
         }
 
-        public async Task<ProductInStockDto> UpdateProductInCity(int cityId, int productId, ProductStockRequest request)
+        public async Task<ProductInStockDto> UpdateProductInCity(ProductStockRequest request)
         {
-            await ValidateCity(cityId);
+            await ValidateCity(request.CityId);
             
             var productStock = await _appDbContext.ProductStocks
-                .Where(ps => ps.Stock.City.Id == cityId && ps.ProductId == productId)
+                .Where(ps => ps.Stock.City.Id == request.CityId && ps.ProductId == request.ProductId)
                 .Include(p => p.Product)
                 .Include(p => p.Stock.City)
                 .FirstOrDefaultAsync();
 
             if (productStock == null)
             {
-                throw new EntityNotFoundException($"Product with {productId} not found in City with {cityId}!");
+                throw new EntityNotFoundException($"Product with id: {request.ProductId} not found in City with id: {request.CityId}!");
             }
 
             productStock.Price = request.Price;
@@ -98,6 +98,36 @@ namespace CockyShop.Services
 
         }
 
+        public async Task<ProductInStockDto> CreateProductInCity(ProductStockRequest request)
+        {
+            await ValidateCity(request.CityId);
+            await ValidateProduct(request.ProductId);
+
+            var product = new ProductStock()
+            {
+                ProductId = request.ProductId,
+                Product = await _appDbContext.Products.FindAsync(request.ProductId),
+                Price = request.Price,
+                QtyOnStock = request.QtyOnStock,
+                Stock = await _appDbContext.Stocks.Where(s => s.City.Id == request.CityId).FirstOrDefaultAsync(),
+            };
+
+            await _appDbContext.ProductStocks.AddAsync(product);
+            await _appDbContext.SaveChangesAsync();
+
+            return new ProductInStockDto()
+            {
+                Id = product.Id,
+                Price = product.Price,
+                CityId = product.Stock.City.Id,
+                Name = product.Product.Name,
+                CityName = product.Stock.City.Name,
+                Available = product.QtyOnStock > 0,
+                QtyOnStock = (int)product.QtyOnStock
+            };
+        }
+
+
         public async Task DeleteProductInCityById(int cityId, int productId)
         {
             await ValidateCity(cityId);
@@ -108,7 +138,7 @@ namespace CockyShop.Services
 
             if (productStock == null)
             {
-                throw new EntityNotFoundException($"Product with {productId} not found in City with {cityId}!");
+                throw new EntityNotFoundException($"Product with id: {productId} not found in City with id: {cityId}!");
             }
 
             _appDbContext.ProductStocks.Remove(productStock);
@@ -136,7 +166,7 @@ namespace CockyShop.Services
 
             if (productDto == null)
             {
-                throw new EntityNotFoundException($"Product with {id} not found!");
+                throw new EntityNotFoundException($"Product with id: {id} not found!");
             }
 
             return productDto;
@@ -163,7 +193,7 @@ namespace CockyShop.Services
 
             if (productDto == null)
             {
-                throw new EntityNotFoundException($"Product with {id} not found!");
+                throw new EntityNotFoundException($"Product with id: {id} not found!");
             }
 
             productDto.Name = request.Name;
@@ -181,7 +211,7 @@ namespace CockyShop.Services
 
             if (product == null)
             {
-                throw new EntityNotFoundException($"Product with {id} not found!");
+                throw new EntityNotFoundException($"Product with id: {id} not found!");
             }
 
             _appDbContext.Products.Remove(product);
@@ -196,7 +226,23 @@ namespace CockyShop.Services
 
             if (city == null)
             {
-                throw new DomainException($"City with {cityId} does not exist!");
+                throw new DomainException($"City with id: {cityId} does not exist!");
+            }
+        }
+        
+        private async Task ValidateProduct(int productId)
+        {
+            var generalProduct = await _appDbContext.Products.FindAsync(productId);
+            if (generalProduct == null)
+            {
+                throw new DomainException($"Product with such id: {productId} does not exist!");
+            }
+            
+            var productInStock = await _appDbContext.ProductStocks.Where(ps => ps.ProductId == productId).FirstOrDefaultAsync();
+            
+            if (productInStock != null)
+            {
+                throw new DomainException($"Product with such id: {productId} already exists in this stock!");
             }
         }
     }

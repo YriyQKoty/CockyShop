@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using CockyShop.Extensions;
 using CockyShop.Infrastucture;
 using CockyShop.Middlewares;
+using CockyShop.Validators;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -30,7 +32,10 @@ namespace CockyShop
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddFluentValidation(c =>
+            {
+                c.RegisterValidatorsFromAssemblyContaining<ProductRequestValidator>();
+            });
             
             services.AddAppServices(Configuration);
             services.AddIdentityServices(Configuration);
@@ -41,7 +46,7 @@ namespace CockyShop
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //app.UseMiddleware<ExceptionHandlerMiddleware>();
+            app.UseMiddleware<ExceptionHandlerMiddleware>();
             
             if (env.IsDevelopment())
             {

@@ -30,10 +30,15 @@ namespace CockyShop.Controllers
         }
         
         [HttpPut("products/{productId}")]
-        public async Task<ActionResult<ProductInStockDto>> UpdateProductInCityById([FromQuery] int cityId,
-            [FromRoute] int productId, [FromBody] ProductStockRequest request)
+        public async Task<ActionResult<ProductInStockDto>> UpdateProductInCityById([FromBody] ProductStockRequest request)
         {
-            return Ok(await _productsService.UpdateProductInCity(cityId, productId, request));
+            return Ok(await _productsService.UpdateProductInCity(request));
+        }
+
+        [HttpPost("products")]
+        public async Task<ActionResult<ProductInStockDto>> CreateProductInCity([FromBody] ProductStockRequest request)
+        {
+            return Ok(await _productsService.CreateProductInCity(request));
         }
         
         [HttpDelete("products/{productId}")]

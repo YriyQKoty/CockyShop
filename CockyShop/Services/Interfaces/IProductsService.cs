@@ -12,7 +12,9 @@ namespace CockyShop.Services.Interfaces
 
         Task<ProductInStockDto> GetProductInCityById(int cityId, int productId);
 
-        Task<ProductInStockDto> UpdateProductInCity(int cityId, int productId, ProductStockRequest request);
+        Task<ProductInStockDto> UpdateProductInCity(ProductStockRequest request);
+
+        Task<ProductInStockDto> CreateProductInCity(ProductStockRequest request);
 
         Task DeleteProductInCityById(int cityId, int productId);
         
