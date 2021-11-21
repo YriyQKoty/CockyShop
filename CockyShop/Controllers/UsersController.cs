@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using CockyShop.Exceptions;
 using CockyShop.Infrastucture;
 using CockyShop.Models.DTO;
@@ -18,12 +19,14 @@ namespace CockyShop.Controllers
         private SignInManager<AppUser> _signInManager;
         private UserManager<AppUser> _userManager;
         private AppDbContext _appDbContext;
+        private IMapper _mapper;
 
-        public UsersController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, AppDbContext appDbContext)
+        public UsersController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, AppDbContext appDbContext, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _appDbContext = appDbContext;
+            _mapper = mapper;
         }
         
         [HttpPost("login")]
@@ -48,7 +51,8 @@ namespace CockyShop.Controllers
                 User = new AppUserDto()
                 {
                     Email = user.Email,
-                    UserName = user.UserName
+                    UserName = user.UserName,
+                    Orders = new List<OrderDto>()
                 },
                 JwtToken = String.Empty
             });
@@ -68,6 +72,7 @@ namespace CockyShop.Controllers
             {
                 UserName = request.UserName,
                 Email = request.Email
+                
             };
 
             var identityUser = await _userManager.CreateAsync(user, request.Password);
@@ -80,7 +85,8 @@ namespace CockyShop.Controllers
             return Ok(new AppUserDto()
             {
                 Email = user.Email,
-                UserName = user.UserName
+                UserName = user.UserName,
+                Orders = new List<OrderDto>()
             });
         }
 
@@ -105,12 +111,12 @@ namespace CockyShop.Controllers
             }
 
             user.Orders = await _appDbContext.Orders.Where(o => o.UserId == user.Id).ToListAsync();
-            
+
             return Ok(new AppUserDto()
             {
                 Email = user.Email,
                 UserName = user.UserName,
-                Orders = user.Orders
+                Orders = _mapper.Map<List<OrderDto>>(user.Orders)
             });
         }
     }

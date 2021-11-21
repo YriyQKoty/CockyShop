@@ -8,6 +8,6 @@ namespace CockyShop.Models.DTO
         public string UserName { get; set; }
         public string Email { get; set; }
         
-        public ICollection<Order> Orders { get; set; }
+        public ICollection<OrderDto> Orders { get; set; }
     }
 }
