@@ -3,10 +3,12 @@ using System.Threading.Tasks;
 using CockyShop.Models.DTO;
 using CockyShop.Models.Requests;
 using CockyShop.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CockyShop.Controllers
 {
+    [Authorize]
     public class ProductsController : AppBaseController
     {
         private IProductsService _productsService;
@@ -28,6 +30,7 @@ namespace CockyShop.Controllers
             return Ok(await _productsService.GetProductById(id));
         }
         
+      
         [HttpPost]
         public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] ProductRequest request)
         {

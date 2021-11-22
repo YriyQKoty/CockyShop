@@ -5,11 +5,13 @@ using CockyShop.Infrastucture;
 using CockyShop.Models.DTO;
 using CockyShop.Models.Enums;
 using CockyShop.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CockyShop.Controllers
 {
+    [Authorize]
     public class OrderStatusesController : AppBaseController
     {
         private AppDbContext _appDbContext;
@@ -18,7 +20,7 @@ namespace CockyShop.Controllers
         {
             _appDbContext = appDbContext;
         }
-
+   
         [HttpGet]
         public async Task<IActionResult> GetOrderStatuses()
         {

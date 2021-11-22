@@ -38,7 +38,29 @@ namespace CockyShop
             services.AddAppServices(Configuration);
             services.AddIdentityServices(Configuration);
 
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "CockyShop", Version = "v1"}); });
+            services.AddAuthorizationServices(Configuration);
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "CockyShop", Version = "v1"});
+                c.AddSecurityDefinition("Bearer", 
+                    new OpenApiSecurityScheme{
+                        Description = "JWT Authorization header using the Bearer scheme.",
+                        Type = SecuritySchemeType.Http, 
+                        Scheme = "bearer" 
+                    });
+            
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement{ 
+                    {
+                        new OpenApiSecurityScheme{
+                            Reference = new OpenApiReference{
+                                Id = "Bearer", 
+                                Type = ReferenceType.SecurityScheme
+                            }
+                        },new List<string>()
+                    }
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

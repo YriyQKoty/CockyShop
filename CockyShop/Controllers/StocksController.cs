@@ -3,10 +3,12 @@ using System.Threading.Tasks;
 using CockyShop.Models.DTO;
 using CockyShop.Models.Requests;
 using CockyShop.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CockyShop.Controllers
-{
+{        
+    [Authorize]
     public class StocksController : AppBaseController
     {
         private IProductsService _productsService;

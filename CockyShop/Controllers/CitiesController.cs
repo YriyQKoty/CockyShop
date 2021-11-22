@@ -5,11 +5,13 @@ using CockyShop.Infrastucture;
 using CockyShop.Models.App;
 using CockyShop.Models.DTO;
 using CockyShop.Models.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CockyShop.Controllers
 {
+    [Authorize]
     public class CitiesController : AppBaseController
     {
         private AppDbContext _appDbContext;
@@ -19,6 +21,7 @@ namespace CockyShop.Controllers
             _appDbContext = appDbContext;
         }
 
+     
         [HttpGet]
         public async Task<ActionResult<CityDto>> GetAllCities()
         {
@@ -31,6 +34,7 @@ namespace CockyShop.Controllers
             return Ok(cities);
         }
 
+      
         [HttpPost]
         public async Task<ActionResult<CityDto>> CreateCity([FromBody] CityRequest request)
         {
