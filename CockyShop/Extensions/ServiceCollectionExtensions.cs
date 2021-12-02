@@ -54,17 +54,24 @@ namespace CockyShop.Extensions
 
             services.AddDbContext<AppDbContext>(o =>
                 o.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
+            
             services.AddScoped<IProductsService, ProductsService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOrdersService, OrdersService>();
             services.AddTransient<ExceptionHandlerMiddleware>();
 
             return services;
         }
 
+
         public static IServiceCollection AddAuthorizationServices(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdministratorRole",
+                    policy => policy.RequireRole("Admin"));
+            });
 
             services
                 .AddAuthentication(options =>

@@ -12,7 +12,7 @@ namespace CockyShop.Validators.Users
                 .WithMessage("Email should be like: test@mail.com");
             RuleFor(lu => lu.Password)
                 .Matches(@"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$")
-                .WithMessage("Password should have at least 8 chars, at least 1 capital letter and 1 digit!");
+                .WithMessage("Password should have at least 8 chars, at least 1 capital letter, 1 small letter and 1 digit!");
             
             RuleFor(lu => lu.UserName).MinimumLength(3)
                 .WithMessage("User name length should be in range [3-100]!");

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CockyShop.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "RequireAdministratorRole")]
     public class OrderStatusesController : AppBaseController
     {
         private AppDbContext _appDbContext;

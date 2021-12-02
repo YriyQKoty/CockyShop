@@ -11,6 +11,8 @@ using CockyShop.Infrastucture;
 using CockyShop.Models.DTO;
 using CockyShop.Models.Identity;
 using CockyShop.Models.Requests;
+using CockyShop.Services;
+using CockyShop.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,34 +23,30 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 
 namespace CockyShop.Controllers
 {
+    [Authorize(Policy = "RequireAdministratorRole")]
     public class UsersController : AppBaseController
     {
         private readonly SignInManager<AppUser> _signInManager;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly AppDbContext _appDbContext;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
+        private readonly IOrdersService _ordersService;
 
-        public UsersController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, 
-            AppDbContext appDbContext, IMapper mapper, IConfiguration configuration)
+        public UsersController(SignInManager<AppUser> signInManager, IMapper mapper,
+            IConfiguration configuration, IUserService userService, IOrdersService ordersService)
         {
-            _userManager = userManager;
             _signInManager = signInManager;
-            _appDbContext = appDbContext;
             _mapper = mapper;
             _configuration = configuration;
+            _userService = userService;
+            _ordersService = ordersService;
         }
         
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<LoggedUserDto>> Login([FromBody] LoggedUserRequest request)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
-
-            if (user == null)
-            {
-                throw new EntityNotFoundException($"User with such email {request.Email} was not found!");
-            }
+            var user = await _userService.FindUserByEmailAsync(request.Email);
 
             var checkPwd = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
@@ -67,7 +65,8 @@ namespace CockyShop.Controllers
                     UserName = user.UserName,
                     Orders = new List<OrderDto>()
                 },
-                JwtToken = token
+                JwtToken = token,
+                Roles = await _userService.GetAllUserRolesAsync(user)
             });
         }
 
@@ -75,23 +74,17 @@ namespace CockyShop.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<AppUserDto>> Register([FromBody] RegisterUserRequest request)
         {
-            await ValidateDuplicatedUser(request);
+            await _userService.ValidateDuplicatedUserAsync(request);
 
             var user = new AppUser()
             {
                 UserName = request.UserName,
                 Email = request.Email
-                
             };
 
-            var identityUser = await _userManager.CreateAsync(user, request.Password);
-            if (!identityUser.Succeeded)
-            {
-                var err = identityUser.Errors.First();
-                throw new DomainException($"{err.Description}, {err.Code}");
-            }
+            await _userService.CreateUserAsync(user, request.Password);
 
-            await _userManager.AddToRoleAsync(user, "CUSTOMER");
+            await _userService.AddRoleToUserAsync(user, "CUSTOMER");
 
             return Ok(new AppUserDto()
             {
@@ -101,52 +94,63 @@ namespace CockyShop.Controllers
             });
         }
 
-        private async Task ValidateDuplicatedUser(RegisterUserRequest request)
-        {
-            var userNameDuplicate = await _userManager.FindByNameAsync(request.UserName);
-
-            if (userNameDuplicate != null)
-            {
-                throw new DomainException($"User with such a name {request.UserName} already exists!");
-            }
-        }
 
         [HttpGet]
         public async Task<ActionResult<List<AppUserDto>>> GetUsers()
         {
-            return Ok(await _appDbContext.Users.Select(ap => new AppUserDto()
-            {
-                Email = ap.Email,
-                UserName = ap.UserName
-            }).ToListAsync());
+            return Ok(_mapper.Map<List<AppUserDto>>(await _userService.GetAllUsers()));
         }
 
         [HttpGet("email")]
-        [Authorize]
         public async Task<ActionResult<AppUserDto>> GetUserByEmail([FromQuery] string email)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-
-            if (user == null)
-            {
-                throw new EntityNotFoundException($"User with such email {email} was not found!");
-            }
-
-            user.Orders = await _appDbContext.Orders.Where(o => o.UserId == user.Id).ToListAsync();
+            var user = await _userService.FindUserByEmailAsync(email);
 
             return Ok(new AppUserDto()
             {
                 Email = user.Email,
                 UserName = user.UserName,
-                Orders = _mapper.Map<List<OrderDto>>(user.Orders)
+                Orders = await _ordersService.GetAllOrdersByUserIdAsync(user.Id)
             });
+        }
+        
+        [HttpPost("role")]
+        public async Task<ActionResult<AppUserDto>> UpdateUserRole([FromBody] UserRoleRequest request)
+        {
+            var user = await _userService.FindUserByEmailAsync(request.Email);
+
+            var role = await _userService.FindRoleByNameAsync(request.Role);
+            
+            await _userService.AddRoleToUserAsync(user, role.Name);
+            
+            return Ok(new LoggedUserDto()
+            {
+                User = new AppUserDto()
+                {
+                    Email = user.Email,
+                    UserName = user.UserName,
+                    Orders = null
+                },
+                Roles = await _userService.GetAllUserRolesAsync(user)
+
+            });
+        }
+
+        [HttpDelete]
+        public async Task<ActionResult<AppUserDto>> DeleteUser([FromQuery] string email)
+        {
+            var user = await _userService.FindUserByEmailAsync(email);
+
+            await _userService.DeleteUserAsync(user);
+            
+            return NoContent();
         }
         
         
         private async Task<string> GenerateJwtToken(string email, AppUser user)
         {
            
-            var userRoles = await _userManager.GetRolesAsync(user);
+            var userRoles = await _userService.GetAllUserRolesAsync(user);
 
             var claims = new List<Claim>
             {

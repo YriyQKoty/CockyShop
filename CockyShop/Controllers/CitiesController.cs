@@ -36,6 +36,7 @@ namespace CockyShop.Controllers
 
       
         [HttpPost]
+        [Authorize(Policy = "RequireAdministratorRole")]
         public async Task<ActionResult<CityDto>> CreateCity([FromBody] CityRequest request)
         {
             var city = await _appDbContext.Cities.Where(c => c.Name.Equals(request.Name)).FirstOrDefaultAsync();

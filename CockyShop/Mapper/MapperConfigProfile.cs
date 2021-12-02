@@ -2,6 +2,7 @@
 using CockyShop.Models.App;
 using CockyShop.Models.DTO;
 using CockyShop.Models.Enums;
+using CockyShop.Models.Identity;
 
 namespace CockyShop.Mapper
 {
@@ -13,6 +14,7 @@ namespace CockyShop.Mapper
             CreateMap<OrderDetails, OrderDetailsDto>();
             CreateMap<OrderStatus, OrderStatusDto>();
             CreateMap<OrderedProduct, OrderedProductDto>();
+            CreateMap<AppUser, AppUserDto>();
 
         }
     }

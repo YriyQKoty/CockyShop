@@ -32,18 +32,21 @@ namespace CockyShop.Controllers
         }
         
         [HttpPut("products/{productId}")]
+        [Authorize(Policy = "RequireAdministratorRole")]
         public async Task<ActionResult<ProductInStockDto>> UpdateProductInCityById([FromBody] ProductStockRequest request)
         {
             return Ok(await _productsService.UpdateProductInCity(request));
         }
 
         [HttpPost("products")]
+        [Authorize(Policy = "RequireAdministratorRole")]
         public async Task<ActionResult<ProductInStockDto>> CreateProductInCity([FromBody] ProductStockRequest request)
         {
             return Ok(await _productsService.CreateProductInCity(request));
         }
         
         [HttpDelete("products/{productId}")]
+        [Authorize(Policy = "RequireAdministratorRole")]
         public async Task<ActionResult> DeleteProductInCityById([FromQuery] int cityId, [FromRoute] int productId)
         {
             await _productsService.DeleteProductInCityById(cityId, productId);

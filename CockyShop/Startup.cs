@@ -39,6 +39,8 @@ namespace CockyShop
             services.AddIdentityServices(Configuration);
 
             services.AddAuthorizationServices(Configuration);
+            
+            
 
             services.AddSwaggerGen(c =>
             {
