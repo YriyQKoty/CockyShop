@@ -8,6 +8,6 @@ namespace CockyShop.Models.DTO
         
         public string UserId { get; set; }
         
-        public OrderDetailsDto OrderDetailsDto { get; set; }
+        public OrderDetailsDto OrderDetails { get; set; }
     }
 }

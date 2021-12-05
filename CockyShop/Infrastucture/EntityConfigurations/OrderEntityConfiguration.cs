@@ -13,10 +13,6 @@ namespace CockyShop.Infrastucture.EntityConfigurations
                 .WithMany(a => a.Orders)
                 .HasForeignKey(o => o.UserId);
 
-            builder.HasOne<OrderDetails>()
-                .WithOne(o => o.Order)
-                //.HasForeignKey<OrderDetails>(o => o.OrderId)
-                .HasForeignKey<Order>(o => o.OrderDetailsId);
         }
     }
 }

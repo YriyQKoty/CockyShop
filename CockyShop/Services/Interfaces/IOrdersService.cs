@@ -16,8 +16,10 @@ namespace CockyShop.Services.Interfaces
 
         Task<OrderDto> CreateOrderAsync(OrderRequest request);
 
-        Task<OrderDto> ChangeOrderStatusByIdAsync(int id, OrderStatusRequest request);
+        Task<OrderDto> ChangeOrderStatusByIdAsync(string userId, int orderId, OrderStatusRequest request);
 
         Task<List<OrderDto>> ChangeAllUserOrderStatusesAsync(string userId, OrderStatusRequest request);
+
+        Task<OrderDto> CancelOrder(string email, int id);
     }
 }

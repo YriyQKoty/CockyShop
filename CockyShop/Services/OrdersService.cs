@@ -40,41 +40,46 @@ namespace CockyShop.Services
                 throw new EntityNotFoundException($"User with such email {email} was not found!");
             }
 
-            var orders = await _appDbContext.Orders.Where(o => o.UserId == user.Id).ToListAsync();
-            
+            var orders = await _appDbContext.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.OrderedProducts)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.Status)
+                .Where(o => o.UserId == user.Id)
+                .ToListAsync();
+
             return _autoMapper.Map<List<OrderDto>>(orders);
         }
 
         public async Task<List<OrderDto>> GetAllOrdersByUserIdAsync(string userId)
         {
-            var user = await _userService.FindUserByUserIdAsync(userId);
-            
-            if (user == null)
-            {
-                throw new EntityNotFoundException($"User with such id {userId} was not found!");
-            }
+            var user = await ValidateUserById(userId);
 
-            return _autoMapper.Map<List<OrderDto>>(
-                _appDbContext.Orders.Where(o => o.UserId == user.Id)
+            var orders = await _appDbContext.Orders
                 .Include(o => o.OrderDetails)
-                .ToListAsync());
+                .ThenInclude(o => o.OrderedProducts)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.Status)
+                .Where(o => o.UserId == user.Id)
+                .ToListAsync();
+            
+            _autoMapper.ConfigurationProvider.AssertConfigurationIsValid();
+            var res = _autoMapper.Map<List<Order>,List<OrderDto>>(orders);
+            
+            return res;
         }
 
+      
         public async Task<OrderDto> GetOrderByIdAsync(int id)
         {
-            var order = await ValidateOnExist(id);
+            var order = await ValidateOrder(id);
 
             return _autoMapper.Map<OrderDto>(order);
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderRequest request)
         {
-            var user = await _userService.FindUserByEmailAsync(request.UserEmail);
-
-            if (user == null)
-            {
-                throw new EntityNotFoundException($"User with such email {request.UserEmail} was not found!");
-            }
+            var user = await ValidateUserByEmail(request.UserEmail);
 
             var order = new Order
             {
@@ -116,25 +121,27 @@ namespace CockyShop.Services
             {
                 Id = order.Id,
                 UserId = order.UserId,
-                OrderDetailsDto = new OrderDetailsDto()
+                OrderDetails = new OrderDetailsDto()
                 {
                     DateOrdered = order.OrderDetails.DateOrdered,
-                    OrderedProductsDtos = _autoMapper.Map<List<OrderedProductDto>>(order.OrderDetails.OrderedProducts),
-                    Status = new OrderStatusDto{Name = order.OrderDetails.Status.StatusName, Id = order.OrderDetails.Status.Id },
+                    OrderedProducts = _autoMapper.Map<List<OrderedProductDto>>(order.OrderDetails.OrderedProducts),
+                    Status = new OrderStatusDto{StatusName = order.OrderDetails.Status.StatusName, Id = order.OrderDetails.Status.Id },
                     Id = order.OrderDetails.Id
                 }
             };
         }
 
-
-
-        public async Task<OrderDto> ChangeOrderStatusByIdAsync(int id, OrderStatusRequest request)
+      
+        public async Task<OrderDto> ChangeOrderStatusByIdAsync(string userId,int orderId, OrderStatusRequest request)
         {
-            var order = await ValidateOnExist(id);
+            await ValidateUserById(userId);
             
-            var status = await ValidateStatusOnExist(request);
+            var order = await ValidateOrder(orderId);
+            
+            var status = await ValidateOrderStatus(request);
 
-            order.OrderDetails.Status = new OrderStatus() {StatusName = status.StatusName, Id = status.Id};
+            order.OrderDetails.Status = status;
+            
             await _appDbContext.SaveChangesAsync();
             
             return _autoMapper.Map<OrderDto>(order);
@@ -143,29 +150,56 @@ namespace CockyShop.Services
 
         public async Task<List<OrderDto>> ChangeAllUserOrderStatusesAsync(string userId, OrderStatusRequest request)
         {
-            var user = await _userService.FindUserByUserIdAsync(userId);
+            await ValidateUserById(userId);
             
-            if (user == null)
+            var orders = await _appDbContext.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.OrderedProducts)
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.Status)
+                .Where(o => o.UserId == userId)
+                .ToListAsync();
+            
+            var status = await ValidateOrderStatus(request);
+            
+            foreach (var order in orders)
             {
-                throw new EntityNotFoundException($"User with such id {userId} was not found!");
-            }
-            
-            var status = await ValidateStatusOnExist(request);
-            
-            foreach (var order in user.Orders)
-            {
-                order.OrderDetails.Status = new OrderStatus() {StatusName = status.StatusName, Id = status.Id};
+                order.OrderDetails.Status = status;
                 order.OrderDetails.EstimatedTime = TimeSpan.Zero;
             }
+            
             await _appDbContext.SaveChangesAsync();
 
-            return _autoMapper.Map<List<OrderDto>>(user.Orders);
+            return _autoMapper.Map<List<OrderDto>>(orders);
 
         }
-        
-        private async Task<Order> ValidateOnExist(int id)
+
+        public async Task<OrderDto> CancelOrder(string email, int id)
         {
-            var order = await _appDbContext.Orders.SingleOrDefaultAsync(o => o.Id == id);
+            await ValidateUserByEmail(email);
+
+            var order = await ValidateOrder(id);
+            
+            var status = await ValidateOrderStatus(new OrderStatusRequest() {Name = "Cancelled"});
+
+            order.OrderDetails.Status = status;
+            
+            await _appDbContext.SaveChangesAsync();
+            
+            return _autoMapper.Map<OrderDto>(order);
+        }
+
+
+        #region Helpers
+
+        private async Task<Order> ValidateOrder(int id)
+        {
+            var order = await _appDbContext.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(o => o.OrderedProducts)
+                .Include(o=>o.OrderDetails)
+                .ThenInclude(o => o.Status)
+                .SingleOrDefaultAsync(o => o.Id == id);
 
             if (order == null)
             {
@@ -175,7 +209,7 @@ namespace CockyShop.Services
             return order;
         }
         
-        private async Task<OrderStatus> ValidateStatusOnExist(OrderStatusRequest request)
+        private async Task<OrderStatus> ValidateOrderStatus(OrderStatusRequest request)
         {
             var status = await _appDbContext.OrderStatuses.SingleOrDefaultAsync(s => s.StatusName == request.Name);
 
@@ -183,9 +217,38 @@ namespace CockyShop.Services
             {
                 throw new EntityNotFoundException($"Status with such name {request.Name} was not found!");
             }
-
             return status;
         }
+        
+        private async Task<AppUser> ValidateUserById(string userId)
+        {
+            var user = await _userService.FindUserByUserIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new EntityNotFoundException($"User with such id {userId} was not found!");
+            }
+
+            return user;
+        }
+        
+        private async Task<AppUser> ValidateUserByEmail(string email)
+        {
+            var user = await _userService.FindUserByEmailAsync(email);
+
+            if (user == null)
+            {
+                throw new EntityNotFoundException($"User with such email {email} was not found!");
+            }
+
+            return user;
+        }
+
+
+        #endregion
+       
+
+
         
         
     }

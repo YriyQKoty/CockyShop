@@ -10,7 +10,6 @@ namespace CockyShop.Models.App
         [ForeignKey("AppUserId")]
         public string UserId { get; set; }
         
-        public int OrderDetailsId { get; set; }
 
         public OrderDetails OrderDetails { get; set; }
 

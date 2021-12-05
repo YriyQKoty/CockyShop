@@ -27,7 +27,7 @@ namespace CockyShop.Controllers
             var statuses =  await _appDbContext.OrderStatuses.Select(os => new OrderStatusDto()
             {
                 Id = os.Id,
-                Name = os.StatusName
+                StatusName = os.StatusName
             }).ToListAsync();
 
             return Ok(statuses);
@@ -49,7 +49,7 @@ namespace CockyShop.Controllers
             return Ok(new OrderStatusDto()
             {
                 Id = os.Entity.Id,
-                Name = request.Name
+                StatusName = request.Name
             });
         }
         

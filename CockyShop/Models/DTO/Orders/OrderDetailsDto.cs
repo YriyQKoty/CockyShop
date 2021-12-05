@@ -15,6 +15,6 @@ namespace CockyShop.Models.DTO
         
         public OrderStatusDto Status { get; set; }
 
-        public ICollection<OrderedProductDto> OrderedProductsDtos { get; set; }
+        public ICollection<OrderedProductDto> OrderedProducts { get; set; }
     }
 }
