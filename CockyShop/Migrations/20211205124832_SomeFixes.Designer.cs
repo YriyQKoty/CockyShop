@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CockyShop.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210915214624_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20211205124832_SomeFixes")]
+    partial class SomeFixes
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,28 +21,39 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.City", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("CockyShop.Models.App.Order", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderDetailsId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderDetailsId2")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderDetailsId")
+                        .IsUnique();
+
+                    b.HasIndex("OrderDetailsId2");
 
                     b.HasIndex("UserId");
 
@@ -51,7 +62,7 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.OrderDetails", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -67,10 +78,7 @@ namespace CockyShop.Migrations
                     b.Property<int?>("StatusId")
                         .HasColumnType("int");
 
-                    b.HasKey("GeneralProductId");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
+                    b.HasKey("Id");
 
                     b.HasIndex("StatusId");
 
@@ -79,7 +87,7 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.OrderedProduct", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -95,7 +103,7 @@ namespace CockyShop.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderDetailsId");
 
@@ -106,7 +114,7 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.Product", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -114,14 +122,14 @@ namespace CockyShop.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.ToTable("Products");
                 });
 
             modelBuilder.Entity("CockyShop.Models.App.ProductStock", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -137,7 +145,7 @@ namespace CockyShop.Migrations
                     b.Property<int>("StockId")
                         .HasColumnType("int");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
@@ -148,14 +156,14 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.Stock", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<int?>("CityId")
                         .HasColumnType("int");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CityId");
 
@@ -164,21 +172,21 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.Enums.OrderStatus", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     b.Property<string>("StatusName")
                         .HasColumnType("longtext");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.ToTable("OrderStatuses");
                 });
 
             modelBuilder.Entity("CockyShop.Models.Identity.AppRole", b =>
                 {
-                    b.Property<string>("GeneralProductId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -193,7 +201,7 @@ namespace CockyShop.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -204,7 +212,7 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.Identity.AppUser", b =>
                 {
-                    b.Property<string>("GeneralProductId")
+                    b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
                     b.Property<int>("AccessFailedCount")
@@ -254,7 +262,7 @@ namespace CockyShop.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -268,7 +276,7 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -282,7 +290,7 @@ namespace CockyShop.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
@@ -291,7 +299,7 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.Property<int>("GeneralProductId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -305,7 +313,7 @@ namespace CockyShop.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("GeneralProductId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
@@ -370,24 +378,28 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.Order", b =>
                 {
+                    b.HasOne("CockyShop.Models.App.OrderDetails", null)
+                        .WithOne("Order")
+                        .HasForeignKey("CockyShop.Models.App.Order", "OrderDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CockyShop.Models.App.OrderDetails", "OrderDetails")
+                        .WithMany()
+                        .HasForeignKey("OrderDetailsId2");
+
                     b.HasOne("CockyShop.Models.Identity.AppUser", null)
                         .WithMany("Orders")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("CockyShop.Models.App.OrderDetails", b =>
                 {
-                    b.HasOne("CockyShop.Models.App.Order", "Order")
-                        .WithOne("OrderDetails")
-                        .HasForeignKey("CockyShop.Models.App.OrderDetails", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CockyShop.Models.Enums.OrderStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId");
-
-                    b.Navigation("Order");
 
                     b.Navigation("Status");
                 });
@@ -490,13 +502,10 @@ namespace CockyShop.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CockyShop.Models.App.Order", b =>
-                {
-                    b.Navigation("OrderDetails");
-                });
-
             modelBuilder.Entity("CockyShop.Models.App.OrderDetails", b =>
                 {
+                    b.Navigation("Order");
+
                     b.Navigation("OrderedProducts");
                 });
 

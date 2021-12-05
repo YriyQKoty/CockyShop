@@ -57,7 +57,7 @@ namespace CockyShop.Services
 
             if (user == null)
             {
-                throw new EntityNotFoundException($"User with such User Id {userId} was not found!");
+                throw new EntityNotFoundException($"User with such User GeneralProductId {userId} was not found!");
             }
 
             return user;

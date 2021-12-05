@@ -28,7 +28,8 @@ namespace CockyShop.Services
                 .Where(ps => ps.Stock.City.Id == cityId)
                 .Select(p => new ProductInStockDto()
                 {
-                    Id = p.ProductId,
+                    Id = p.Id,
+                    GeneralProductId = p.ProductId,
                     Name = p.Product.Name,
                     Price = p.Price,
                     CityId = p.Stock.City.Id,
@@ -48,7 +49,8 @@ namespace CockyShop.Services
                 .Where(ps => ps.Stock.City.Id == cityId && ps.ProductId == productId)
                 .Select(p => new ProductInStockDto()
                 {
-                    Id = p.ProductId,
+                    Id = p.Id,
+                    GeneralProductId = p.ProductId,
                     Name = p.Product.Name,
                     Price = p.Price,
                     CityId = p.Stock.City.Id,
@@ -88,6 +90,7 @@ namespace CockyShop.Services
             return new ProductInStockDto()
             {
                 Id = productStock.Id,
+                GeneralProductId = productStock.Id,
                 Price = productStock.Price,
                 Name = productStock.Product.Name,
                 CityId = productStock.Stock.City.Id,
@@ -117,7 +120,7 @@ namespace CockyShop.Services
 
             return new ProductInStockDto()
             {
-                Id = product.Id,
+                GeneralProductId = product.Id,
                 Price = product.Price,
                 CityId = product.Stock.City.Id,
                 Name = product.Product.Name,

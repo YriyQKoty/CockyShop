@@ -27,8 +27,5 @@ namespace CockyShop.Services.Interfaces
         Task<ProductDto> UpdateProductById(int id, ProductRequest request);
 
         Task DeleteProductById(int id);
-
-
-
     }
 }

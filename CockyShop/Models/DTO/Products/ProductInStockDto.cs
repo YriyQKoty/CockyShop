@@ -3,6 +3,7 @@
     public class ProductInStockDto
     {
         public int Id { get; set; }
+        public int GeneralProductId { get; set; }
         public string Name { get; set; }
         public int CityId { get; set; }
         public string CityName { get; set; }

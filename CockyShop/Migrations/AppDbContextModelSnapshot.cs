@@ -37,10 +37,21 @@ namespace CockyShop.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("OrderDetailsId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderDetailsId2")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderDetailsId")
+                        .IsUnique();
+
+                    b.HasIndex("OrderDetailsId2");
 
                     b.HasIndex("UserId");
 
@@ -66,9 +77,6 @@ namespace CockyShop.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
 
                     b.HasIndex("StatusId");
 
@@ -368,24 +376,28 @@ namespace CockyShop.Migrations
 
             modelBuilder.Entity("CockyShop.Models.App.Order", b =>
                 {
+                    b.HasOne("CockyShop.Models.App.OrderDetails", null)
+                        .WithOne("Order")
+                        .HasForeignKey("CockyShop.Models.App.Order", "OrderDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CockyShop.Models.App.OrderDetails", "OrderDetails")
+                        .WithMany()
+                        .HasForeignKey("OrderDetailsId2");
+
                     b.HasOne("CockyShop.Models.Identity.AppUser", null)
                         .WithMany("Orders")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("CockyShop.Models.App.OrderDetails", b =>
                 {
-                    b.HasOne("CockyShop.Models.App.Order", "Order")
-                        .WithOne("OrderDetails")
-                        .HasForeignKey("CockyShop.Models.App.OrderDetails", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CockyShop.Models.Enums.OrderStatus", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId");
-
-                    b.Navigation("Order");
 
                     b.Navigation("Status");
                 });
@@ -488,13 +500,10 @@ namespace CockyShop.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CockyShop.Models.App.Order", b =>
-                {
-                    b.Navigation("OrderDetails");
-                });
-
             modelBuilder.Entity("CockyShop.Models.App.OrderDetails", b =>
                 {
+                    b.Navigation("Order");
+
                     b.Navigation("OrderedProducts");
                 });
 
